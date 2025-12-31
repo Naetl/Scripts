@@ -68,14 +68,14 @@ end
 function TDS:Addons()
     if not waitForGame() then return false end
 
-    code = "https://raw.githubusercontent.com/Naetl/Scripts/refs/heads/main/TDS_AutoStrat.lua"
+    --code = "https://raw.githubusercontent.com/Naetl/Scripts/refs/heads/main/TDS_AutoStrat.lua"
     --[[
     local ok, code = pcall(game.HttpGet, game,
         "https://api.junkie-development.de/api/v1/luascripts/public/57fe397f76043ce06afad24f07528c9f93e97730930242f57134d0b60a2d250b/download"
     )
-    if not ok then return false end]]
+    if not ok then return false end
 
-    loadstring(code)()
+    loadstring(code)()]]
     
 
     local start = os.clock()
