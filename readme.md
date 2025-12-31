@@ -69,6 +69,11 @@ TDS:Addons() -- [[ <- Exclusive Functions:
 --TDS:VoteSkip(1)
 ```
 
+```lua
+loadstring(game:HttpGet("https://raw.githubusercontent.com/Naetl/Scripts/refs/heads/main/TDS_Recorder.lua"))()
+
+```
+
 > [!IMPORTANT]
 > Ensure `_G.SendWebhook` is set to `true` if you provide a URL; otherwise, the script may error out during initialization.
 
