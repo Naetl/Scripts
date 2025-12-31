@@ -1,8 +1,3 @@
---[[
-  AutoStrat Loader v1.0
-  Date: 1/1/26'
-]]
-
 if not game:IsLoaded() then game.Loaded:Wait() end
 
 local function identify_game_state()
@@ -711,10 +706,8 @@ function TDS:Addons()
         return false
     end
     local url = "https://raw.githubusercontent.com/Naetl/Scripts/refs/heads/main/TDS_Equip.lua"
-    --local url = "https://api.junkie-development.de/api/v1/luascripts/public/57fe397f76043ce06afad24f07528c9f93e97730930242f57134d0b60a2d250b/download"
     local success, code = pcall(game.HttpGet, game, url)
 
-    
     if not success then
         return false
     end
