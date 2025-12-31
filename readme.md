@@ -50,9 +50,9 @@ _G.SendWebhook   = false -- Set to true to enable notifications
 _G.Webhook       = "YOUR-WEBHOOK-URL-HERE" 
 
 -- [[ INITIALIZE LIBRARY ]]
-TDS:Addons() -- [[ <- Exclusive Functions:
-• TDS:Equip(): Automatically equips any tower that you own whilst being in-]]
 local TDS = loadstring(game:HttpGet("https://raw.githubusercontent.com/Naetl/Scripts/refs/heads/main/TDS_AutoStrat.lua"))()
+TDS:Addons() -- [[ <- Exclusive Functions:
+-- TDS:Equip(): Automatically equips any tower that you own whilst being in
 
 -- [[ START STRATEGY ]]
 -- Example:
