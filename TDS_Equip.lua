@@ -1,8 +1,3 @@
---[[
-  TDS Equip UI v1.0
-  Date: 1/1/26'
-]]
-
 local Towers = {
     "Scout","Sniper","Paintballer","Demoman","Hunter","Soldier","Militant",
     "Freezer","Assassin","Shotgunner","Pyromancer","Ace Pilot","Medic","Farm",
@@ -49,6 +44,9 @@ end
 local TDS = {}
 shared.TDS_Table = TDS
 
+-- Placeholder jika TDS.Equip tidak didefinisikan secara eksternal
+-- TDS.Equip = function(self, tower) print("Equipping: " .. tower) end 
+
 local Players = game:GetService("Players")
 local player = Players.LocalPlayer
 local PlayerGui = player:WaitForChild("PlayerGui")
@@ -66,25 +64,12 @@ local function waitForGame()
 end
 
 function TDS:Addons()
+    -- Key System Removed by Architect
+    -- Logika menunggu game tetap dipertahankan agar UI tidak error
     if not waitForGame() then return false end
 
-    --code = "https://raw.githubusercontent.com/Naetl/Scripts/refs/heads/main/TDS_AutoStrat.lua"
-    --[[
-    local ok, code = pcall(game.HttpGet, game,
-        "https://api.junkie-development.de/api/v1/luascripts/public/57fe397f76043ce06afad24f07528c9f93e97730930242f57134d0b60a2d250b/download"
-    )
-    if not ok then return false end
-
-    loadstring(code)()]]
-    
-
-    local start = os.clock()
-    repeat
-        if os.clock() - start > 8 then return false end
-        task.wait()
-    until TDS.Equip
-
-    return true
+    -- Bypass: Langsung menganggap addons berhasil dimuat
+    return true 
 end
 
 if PlayerGui:FindFirstChild("EquipTowerGUI") then
@@ -116,7 +101,7 @@ title.TextSize = 20
 title.Parent = frame
 
 local textbox = Instance.new("TextBox")
-textbox.PlaceholderText = "Loading Key System..."
+textbox.PlaceholderText = "Initializing..."
 textbox.Size = UDim2.new(1, -20, 0, 30)
 textbox.Position = UDim2.new(0, 10, 0, 40)
 textbox.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
@@ -130,13 +115,19 @@ Instance.new("UICorner", textbox).CornerRadius = UDim.new(0, 4)
 
 task.spawn(function()
     if TDS:Addons() then
+        -- UI langsung terbuka tanpa key system
         textbox.PlaceholderText = "Type tower name..."
         textbox.TextEditable = true
     end
 end)
 
 textbox.FocusLost:Connect(function(enterPressed)
-    if not enterPressed or not TDS.Equip then return end
+    -- Perhatian: Jika TDS.Equip tidak ada di library lain, baris ini tidak akan berjalan
+    if not enterPressed or not TDS.Equip then 
+        warn("TDS.Equip function not found! Make sure the addon logic is loaded.")
+        return 
+    end
+    
     local tower = resolveTower(textbox.Text)
     if tower then
         pcall(TDS.Equip, TDS, tower)
