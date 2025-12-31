@@ -1,3 +1,8 @@
+--[[
+  TDS Equip UI v1.0
+  Date: 1/1/26'
+]]
+
 local Towers = {
     "Scout","Sniper","Paintballer","Demoman","Hunter","Soldier","Militant",
     "Freezer","Assassin","Shotgunner","Pyromancer","Ace Pilot","Medic","Farm",
