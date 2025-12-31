@@ -1,5 +1,5 @@
 --[[
-  AutoStrat v1.0
+  AutoStrat Loader v1.0
   Date: 1/1/26'
 ]]
 
