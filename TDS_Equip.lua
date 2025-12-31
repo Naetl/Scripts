@@ -11,6 +11,7 @@ local Towers = {
     "Firework Technician","Biologist","Warlock","Spotlight Tech","Mecha Base"
 }
 
+-- // LOGIC: Normalisasi Nama
 local function normalize(s)
     return s:lower():gsub("[^a-z0-9]", "")
 end
@@ -24,6 +25,7 @@ for _, name in ipairs(Towers) do
     }
 end
 
+-- // LOGIC: Pencari Nama Tower
 local function resolveTower(input)
     if input == "" then return end
     local n = normalize(input)
@@ -44,34 +46,32 @@ end
 local TDS = {}
 shared.TDS_Table = TDS
 
--- Placeholder jika TDS.Equip tidak didefinisikan secara eksternal
--- TDS.Equip = function(self, tower) print("Equipping: " .. tower) end 
+-- // LOGIC: Fungsi Equip Manual (Integrasi RemoteFunction)
+function TDS:Equip(tower_name)
+    local Remote = game:GetService("ReplicatedStorage"):WaitForChild("RemoteFunction")
+    local args = {
+        "Inventory",
+        "Equip",
+        "tower",
+        tower_name
+    }
+    
+    local success, err = pcall(function()
+        Remote:InvokeServer(unpack(args))
+    end)
+    
+    if success then
+        print("Successfully equipped: " .. tower_name)
+    else
+        warn("Failed to equip tower: " .. tostring(err))
+    end
+end
 
 local Players = game:GetService("Players")
 local player = Players.LocalPlayer
 local PlayerGui = player:WaitForChild("PlayerGui")
 
-local function waitForGame()
-    if PlayerGui:FindFirstChild("GameGui") then return true end
-    local conn
-    conn = PlayerGui.ChildAdded:Connect(function(c)
-        if c.Name == "GameGui" then
-            conn:Disconnect()
-        end
-    end)
-    repeat task.wait() until PlayerGui:FindFirstChild("GameGui")
-    return true
-end
-
-function TDS:Addons()
-    -- Key System Removed by Architect
-    -- Logika menunggu game tetap dipertahankan agar UI tidak error
-    if not waitForGame() then return false end
-
-    -- Bypass: Langsung menganggap addons berhasil dimuat
-    return true 
-end
-
+-- // UI SETUP
 if PlayerGui:FindFirstChild("EquipTowerGUI") then
     PlayerGui.EquipTowerGUI:Destroy()
 end
@@ -82,55 +82,46 @@ screenGui.ResetOnSpawn = false
 screenGui.Parent = PlayerGui
 
 local frame = Instance.new("Frame")
-frame.Size = UDim2.new(0, 200, 0, 100)
+frame.Size = UDim2.new(0, 220, 0, 100)
 frame.Position = UDim2.new(0, 10, 0, 10)
-frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+frame.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
 frame.BorderSizePixel = 0
 frame.Active = true
 frame.Draggable = true
 frame.Parent = screenGui
-Instance.new("UICorner", frame).CornerRadius = UDim.new(0, 4)
+Instance.new("UICorner", frame).CornerRadius = UDim.new(0, 6)
 
 local title = Instance.new("TextLabel")
-title.Text = "Tower Equipper"
-title.Size = UDim2.new(1, 0, 0, 30)
+title.Text = "TDS Tower Equipper"
+title.Size = UDim2.new(1, 0, 0, 35)
 title.BackgroundTransparency = 1
-title.TextColor3 = Color3.fromRGB(230, 230, 230)
-title.Font = Enum.Font.SourceSansBold
-title.TextSize = 20
+title.TextColor3 = Color3.fromRGB(255, 255, 255)
+title.Font = Enum.Font.GothamBold
+title.TextSize = 16
 title.Parent = frame
 
 local textbox = Instance.new("TextBox")
-textbox.PlaceholderText = "Initializing..."
-textbox.Size = UDim2.new(1, -20, 0, 30)
-textbox.Position = UDim2.new(0, 10, 0, 40)
+textbox.PlaceholderText = "Type Tower Name..."
+textbox.Size = UDim2.new(1, -20, 0, 35)
+textbox.Position = UDim2.new(0, 10, 0, 45)
 textbox.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-textbox.TextColor3 = Color3.fromRGB(230, 230, 230)
-textbox.Font = Enum.Font.SourceSans
-textbox.TextSize = 18
-textbox.TextEditable = false
+textbox.TextColor3 = Color3.fromRGB(255, 255, 255)
+textbox.Font = Enum.Font.Gotham
+textbox.TextSize = 14
 textbox.Text = ""
 textbox.Parent = frame
 Instance.new("UICorner", textbox).CornerRadius = UDim.new(0, 4)
 
-task.spawn(function()
-    if TDS:Addons() then
-        -- UI langsung terbuka tanpa key system
-        textbox.PlaceholderText = "Type tower name..."
-        textbox.TextEditable = true
-    end
-end)
-
+-- // LOGIC: Input Handler
 textbox.FocusLost:Connect(function(enterPressed)
-    -- Perhatian: Jika TDS.Equip tidak ada di library lain, baris ini tidak akan berjalan
-    if not enterPressed or not TDS.Equip then 
-        warn("TDS.Equip function not found! Make sure the addon logic is loaded.")
-        return 
-    end
+    if not enterPressed then return end
     
     local tower = resolveTower(textbox.Text)
     if tower then
-        pcall(TDS.Equip, TDS, tower)
+        TDS:Equip(tower)
+        textbox.PlaceholderText = "Equipped: " .. tower
+    else
+        textbox.PlaceholderText = "Tower not found!"
     end
     textbox.Text = ""
 end)
