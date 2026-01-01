@@ -70,10 +70,17 @@ local upgrade_history = {}
 -- // shared for addons
 shared.TDS_Table = TDS
 
-local url = "https://raw.githubusercontent.com/Naetl/Scripts/refs/heads/main/TDS_Equip.lua"
-pcall(function()
-    loadstring(game:HttpGet(url))()
-end)
+if game_state ~= "GAME" then
+        return false
+    end
+    local url = "https://raw.githubusercontent.com/Naetl/Scripts/refs/heads/main/TDS_Equip.lua"
+    local success, code = pcall(game.HttpGet, game, url)
+
+    if not success then
+        return false
+    end
+
+    loadstring(code)()
 
 -- Langsung buka akses UI
 textbox.PlaceholderText = "Type tower name..."
