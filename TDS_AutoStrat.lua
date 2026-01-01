@@ -70,22 +70,6 @@ local upgrade_history = {}
 -- // shared for addons
 shared.TDS_Table = TDS
 
-if game_state ~= "GAME" then
-        return false
-    end
-    local url = "https://raw.githubusercontent.com/Naetl/Scripts/refs/heads/main/TDS_Equip.lua"
-    local success, code = pcall(game.HttpGet, game, url)
-
-    if not success then
-        return false
-    end
-
-    loadstring(code)()
-
--- Langsung buka akses UI
-textbox.PlaceholderText = "Type tower name..."
-textbox.TextEditable = true
-
 -- // currency tracking
 local start_coins, current_total_coins, start_gems, current_total_gems = 0, 0, 0, 0
 if game_state == "GAME" then
