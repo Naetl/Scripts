@@ -51,8 +51,7 @@ _G.Webhook       = "YOUR-WEBHOOK-URL-HERE"
 
 -- [[ INITIALIZE LIBRARY ]]
 local TDS = loadstring(game:HttpGet("https://raw.githubusercontent.com/Naetl/Scripts/refs/heads/main/TDS_AutoStrat.lua"))()
-TDS:Addons() -- [[ <- Exclusive Functions:
--- TDS:Equip(): Automatically equips any tower that you own whilst being in
+TDS:Addons() -- [[ <- Exclusive Functions: make you equip any whitelisted tower.
 
 -- [[ START STRATEGY ]]
 -- Example:
