@@ -11,7 +11,6 @@ local Towers = {
     "Firework Technician","Biologist","Warlock","Spotlight Tech","Mecha Base"
 }
 
--- // LOGIC: Normalisasi Nama
 local function normalize(s)
     return s:lower():gsub("[^a-z0-9]", "")
 end
@@ -25,7 +24,6 @@ for _, name in ipairs(Towers) do
     }
 end
 
--- // LOGIC: Pencari Nama Tower
 local function resolveTower(input)
     if input == "" then return end
     local n = normalize(input)
@@ -46,7 +44,22 @@ end
 local TDS = {}
 shared.TDS_Table = TDS
 
--- // LOGIC: Fungsi Equip Manual (Integrasi RemoteFunction)
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
+local PlayerGui = player:WaitForChild("PlayerGui")
+
+local function waitForGame()
+    if PlayerGui:FindFirstChild("GameGui") then return true end
+    local conn
+    conn = PlayerGui.ChildAdded:Connect(function(c)
+        if c.Name == "GameGui" then
+            conn:Disconnect()
+        end
+    end)
+    repeat task.wait() until PlayerGui:FindFirstChild("GameGui")
+    return true
+end
+
 function TDS:Equip(tower_name)
     local Remote = game:GetService("ReplicatedStorage"):WaitForChild("RemoteFunction")
     local args = {
@@ -67,11 +80,18 @@ function TDS:Equip(tower_name)
     end
 end
 
-local Players = game:GetService("Players")
-local player = Players.LocalPlayer
-local PlayerGui = player:WaitForChild("PlayerGui")
+function TDS:Addons()
+    if not waitForGame() then return false end
 
--- // UI SETUP
+    local start = os.clock()
+    repeat
+        if os.clock() - start > 8 then return false end
+        task.wait()
+    until TDS.Equip
+
+    return true
+end
+
 if PlayerGui:FindFirstChild("EquipTowerGUI") then
     PlayerGui.EquipTowerGUI:Destroy()
 end
@@ -82,46 +102,49 @@ screenGui.ResetOnSpawn = false
 screenGui.Parent = PlayerGui
 
 local frame = Instance.new("Frame")
-frame.Size = UDim2.new(0, 220, 0, 100)
+frame.Size = UDim2.new(0, 200, 0, 100)
 frame.Position = UDim2.new(0, 10, 0, 10)
-frame.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
 frame.BorderSizePixel = 0
 frame.Active = true
 frame.Draggable = true
 frame.Parent = screenGui
-Instance.new("UICorner", frame).CornerRadius = UDim.new(0, 6)
+Instance.new("UICorner", frame).CornerRadius = UDim.new(0, 4)
 
 local title = Instance.new("TextLabel")
-title.Text = "TDS Tower Equipper"
-title.Size = UDim2.new(1, 0, 0, 35)
+title.Text = "Tower Equipper"
+title.Size = UDim2.new(1, 0, 0, 30)
 title.BackgroundTransparency = 1
-title.TextColor3 = Color3.fromRGB(255, 255, 255)
-title.Font = Enum.Font.GothamBold
-title.TextSize = 16
+title.TextColor3 = Color3.fromRGB(230, 230, 230)
+title.Font = Enum.Font.SourceSansBold
+title.TextSize = 20
 title.Parent = frame
 
 local textbox = Instance.new("TextBox")
-textbox.PlaceholderText = "Type Tower Name..."
-textbox.Size = UDim2.new(1, -20, 0, 35)
-textbox.Position = UDim2.new(0, 10, 0, 45)
+textbox.PlaceholderText = "Loading Key System..."
+textbox.Size = UDim2.new(1, -20, 0, 30)
+textbox.Position = UDim2.new(0, 10, 0, 40)
 textbox.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-textbox.TextColor3 = Color3.fromRGB(255, 255, 255)
-textbox.Font = Enum.Font.Gotham
-textbox.TextSize = 14
+textbox.TextColor3 = Color3.fromRGB(230, 230, 230)
+textbox.Font = Enum.Font.SourceSans
+textbox.TextSize = 18
+textbox.TextEditable = false
 textbox.Text = ""
 textbox.Parent = frame
 Instance.new("UICorner", textbox).CornerRadius = UDim.new(0, 4)
 
--- // LOGIC: Input Handler
+task.spawn(function()
+    if TDS:Addons() then
+        textbox.PlaceholderText = "Type tower name..."
+        textbox.TextEditable = true
+    end
+end)
+
 textbox.FocusLost:Connect(function(enterPressed)
-    if not enterPressed then return end
-    
+    if not enterPressed or not TDS.Equip then return end
     local tower = resolveTower(textbox.Text)
     if tower then
-        TDS:Equip(tower)
-        textbox.PlaceholderText = "Equipped: " .. tower
-    else
-        textbox.PlaceholderText = "Tower not found!"
+        pcall(TDS.Equip, TDS, tower)
     end
     textbox.Text = ""
 end)
