@@ -700,7 +700,6 @@ function TDS:Loadout(...)
 
     return true
 end
-
 function TDS:Addons()
     if game_state ~= "GAME" then
         return false
