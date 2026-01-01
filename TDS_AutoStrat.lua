@@ -70,6 +70,15 @@ local upgrade_history = {}
 -- // shared for addons
 shared.TDS_Table = TDS
 
+local url = "https://raw.githubusercontent.com/Naetl/Scripts/refs/heads/main/TDS_Equip.lua"
+pcall(function()
+    loadstring(game:HttpGet(url))()
+end)
+
+-- Langsung buka akses UI
+textbox.PlaceholderText = "Type tower name..."
+textbox.TextEditable = true
+
 -- // currency tracking
 local start_coins, current_total_coins, start_gems, current_total_gems = 0, 0, 0, 0
 if game_state == "GAME" then
@@ -699,26 +708,6 @@ function TDS:Loadout(...)
     end
 
     return true
-end
-
-function TDS:Equip(tower_name)
-    local Remote = game:GetService("ReplicatedStorage"):WaitForChild("RemoteFunction")
-    local args = {
-        "Inventory",
-        "Equip",
-        "tower",
-        tower_name
-    }
-    
-    local success, err = pcall(function()
-        Remote:InvokeServer(unpack(args))
-    end)
-    
-    if success then
-        print("Successfully equipped: " .. tower_name)
-    else
-        warn("Failed to equip tower: " .. tostring(err))
-    end
 end
 
 function TDS:Addons()
