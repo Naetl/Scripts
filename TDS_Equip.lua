@@ -60,29 +60,8 @@ local function waitForGame()
     return true
 end
 
-function TDS:Equip(tower_name)
-    local Remote = game:GetService("ReplicatedStorage"):WaitForChild("RemoteFunction")
-    local args = {
-        "Inventory",
-        "Equip",
-        "tower",
-        tower_name
-    }
-    
-    local success, err = pcall(function()
-        Remote:InvokeServer(unpack(args))
-    end)
-    
-    if success then
-        print("Successfully equipped: " .. tower_name)
-    else
-        warn("Failed to equip tower: " .. tostring(err))
-    end
-end
-
 function TDS:Addons()
     if not waitForGame() then return false end
-
     local start = os.clock()
     repeat
         if os.clock() - start > 8 then return false end
