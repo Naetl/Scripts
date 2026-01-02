@@ -20,16 +20,12 @@ local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local remote = ReplicatedStorage:WaitForChild("RemoteFunction")
 
--- // CONFIGURATION (Toggle Axis Here) # CHANGEABLE
-local useXAxis = true -- SET TRUE untuk X (Samping), SET FALSE untuk Z (Depan/Belakang)
-local offset_val = 1.2 -- THE GAP for each stacking
-
 -- // State Variables
 local isEnabled = false
 local isProcessing = false 
 local loopAmount = 1
 local base_Y = 95
-
+local x_offset = 1.5
 
 -- // Anti-Reset UI Logic
 local playerGui = Players.LocalPlayer:WaitForChild("PlayerGui")
@@ -39,7 +35,7 @@ local screenGui = Instance.new("ScreenGui", playerGui)
 screenGui.Name = "RetroTDS_UI"
 screenGui.ResetOnSpawn = false
 
--- // UI Window (Retro Style)
+-- // UI Window
 local frame = Instance.new("Frame", screenGui)
 frame.Size = UDim2.new(0, 200, 0, 160)
 frame.Position = UDim2.new(0.5, -100, 0.4, 0)
@@ -57,7 +53,7 @@ titleBar.BorderSizePixel = 0
 local titleText = Instance.new("TextLabel", titleBar)
 titleText.Size = UDim2.new(1, -5, 1, 0)
 titleText.Position = UDim2.new(0, 5, 0, 0)
-titleText.Text = "TDS_STACKER_" .. (useXAxis and "X" or "Z") .. ".EXE"
+titleText.Text = "TDS_AUTO_OFF.EXE"
 titleText.TextColor3 = Color3.new(1, 1, 1)
 titleText.Font = Enum.Font.Code
 titleText.BackgroundTransparency = 1
@@ -75,7 +71,7 @@ amountInput.Position = UDim2.new(0.1, 0, 0.68, 0)
 amountInput.Text = "1"
 amountInput.Font = Enum.Font.Code
 
--- // UI Logic
+-- // Fungsi Update UI (Agar bisa dipanggil dari mana saja)
 local function updateUI()
     toggleBtn.Text = isEnabled and "STATUS: ON" or "STATUS: OFF"
     toggleBtn.BackgroundColor3 = isEnabled and Color3.fromRGB(0, 255, 0) or Color3.fromRGB(192, 192, 192)
@@ -86,16 +82,8 @@ toggleBtn.MouseButton1Click:Connect(function()
     updateUI()
 end)
 
--- REAL-TIME UPDATE (No Enter Required)
-amountInput:GetPropertyChangedSignal("Text"):Connect(function()
-    local val = tonumber(amountInput.Text)
-    if val then
-        loopAmount = math.clamp(val, 1, 15)
-    end
-end)
-
--- Clean up text on focus lost
 amountInput.FocusLost:Connect(function()
+    loopAmount = math.clamp(tonumber(amountInput.Text) or 1, 1, 15)
     amountInput.Text = tostring(loopAmount)
 end)
 
@@ -105,6 +93,7 @@ old_namecall = hookmetamethod(game, "__namecall", function(self, ...)
     local method = getnamecallmethod()
     local args = {...}
     
+    -- Proteksi rekursif agar tidak crash
     if isProcessing then 
         return old_namecall(self, ...) 
     end
@@ -116,35 +105,34 @@ old_namecall = hookmetamethod(game, "__namecall", function(self, ...)
             local towerName = args[4]
             local originalData = args[3]
             
-            isProcessing = true 
+            isProcessing = true -- Kunci pintu
             
             task.spawn(function()
                 local currentX = originalData.Position.X
-                local currentZ = originalData.Position.Z
                 
                 for i = 1, loopAmount do
-                    local newPos = vector.create(currentX, base_Y, currentZ)
+                    local newPos = vector.create(currentX, base_Y, originalData.Position.Z)
                     local newData = {Rotation = originalData.Rotation, Position = newPos}
                     
                     remote:InvokeServer("Troops", action, newData, towerName)
                     
-                    -- LOGIKA TOGGLE AXIS
-                    if useXAxis then
-                        currentX = currentX + offset_val
-                    else
-                        currentZ = currentZ + offset_val
-                    end
-                    
+                    currentX = currentX + x_offset
                     task.wait(0.5) 
                 end
                 
-                isEnabled = false
-                isProcessing = false 
-                updateUI()
+                -- // FITUR AUTO-OFF
+                isEnabled = false    -- Matikan state
+                isProcessing = false -- Buka kunci pintu
+                updateUI()           -- Perbarui tampilan tombol
+                print("Sequence finished. Mod disabled.")
             end)
             
             return nil 
         end
+    end
+    
+    return old_namecall(self, ...)
+end)
     end
     
     return old_namecall(self, ...)
