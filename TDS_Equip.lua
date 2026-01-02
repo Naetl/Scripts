@@ -61,7 +61,14 @@ local function waitForGame()
     return true
 end
 
-function TDS:Equip(tower_name)
+function TDS:Equip(input_name)
+    local tower_name = resolveTower(input_name) 
+    
+    if not tower_name then 
+        warn("Tower tidak ditemukan: " .. tostring(input_name))
+        return false 
+    end
+    
     local success = false
     local attempts = 0
     local maxAttempts = 15
