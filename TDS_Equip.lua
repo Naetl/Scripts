@@ -1,3 +1,14 @@
+--[[
+    TDS TOWER EQUIFFER - WINDOWS XP EDITION
+    ---------------------------------------------------------
+    Style: Retro Windows XP (Gray System Color)
+    Features: 
+    - XP Blue Title Bar
+    - Classic Inset/Outset Bevel Borders
+    - Real-time Tower Resolver
+    ---------------------------------------------------------
+]]
+
 local Towers = {
     "Scout","Sniper","Paintballer","Demoman","Hunter","Soldier","Militant",
     "Freezer","Assassin","Shotgunner","Pyromancer","Ace Pilot","Medic","Farm",
@@ -10,7 +21,6 @@ local Towers = {
     "Hallow Punk","Harvester","Snowballer","Elementalist",
     "Firework Technician","Biologist","Warlock","Spotlight Tech","Mecha Base"
 }
-
 
 local function normalize(s)
     return s:lower():gsub("[^a-z0-9]", "")
@@ -49,18 +59,6 @@ local Players = game:GetService("Players")
 local player = Players.LocalPlayer
 local PlayerGui = player:WaitForChild("PlayerGui")
 
-local function waitForGame()
-    if PlayerGui:FindFirstChild("GameGui") then return true end
-    local conn
-    conn = PlayerGui.ChildAdded:Connect(function(c)
-        if c.Name == "GameGui" then
-            conn:Disconnect()
-        end
-    end)
-    repeat task.wait() until PlayerGui:FindFirstChild("GameGui")
-    return true
-end
-
 function TDS:Equip(input_name)
     local tower_name = resolveTower(input_name) 
     
@@ -83,26 +81,23 @@ function TDS:Equip(input_name)
         if ok then
             success = true
         else
-            warn("Gagal Equip, mencoba lagi... (" .. attempts .. ")")
             task.wait(0.2)
         end
     until success or attempts >= maxAttempts
 
-    task.wait(0.4)
-    return success -- Mengembalikan status apakah berhasil atau tidak
+    return success
 end
 
 function TDS:Addons()
-    --if not waitForGame() then return false end
     local start = os.clock()
     repeat
         if os.clock() - start > 8 then return false end
         task.wait()
     until TDS.Equip
-
     return true
 end
 
+-- // UI CONSTRUCTION (XP STYLE)
 if PlayerGui:FindFirstChild("EquipTowerGUI") then
     PlayerGui.EquipTowerGUI:Destroy()
 end
@@ -112,41 +107,85 @@ screenGui.Name = "EquipTowerGUI"
 screenGui.ResetOnSpawn = false
 screenGui.Parent = PlayerGui
 
+-- Window Frame
 local frame = Instance.new("Frame")
-frame.Size = UDim2.new(0, 200, 0, 100)
-frame.Position = UDim2.new(0, 10, 0, 10)
-frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-frame.BorderSizePixel = 0
+frame.Size = UDim2.new(0, 220, 0, 110)
+frame.Position = UDim2.new(0, 20, 0, 20)
+frame.BackgroundColor3 = Color3.fromRGB(212, 208, 200) -- Classic XP Gray
+frame.BorderSizePixel = 1
+frame.BorderColor3 = Color3.fromRGB(255, 255, 255)
 frame.Active = true
 frame.Draggable = true
 frame.Parent = screenGui
-Instance.new("UICorner", frame).CornerRadius = UDim.new(0, 4)
 
-local title = Instance.new("TextLabel")
-title.Text = "Tower Equipper"
-title.Size = UDim2.new(1, 0, 0, 30)
-title.BackgroundTransparency = 1
-title.TextColor3 = Color3.fromRGB(230, 230, 230)
-title.Font = Enum.Font.SourceSansBold
-title.TextSize = 20
-title.Parent = frame
+-- Outset Border Effect
+local border = Instance.new("UIStroke")
+border.Thickness = 2
+border.Color = Color3.fromRGB(128, 128, 128)
+border.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+border.Parent = frame
 
+-- Title Bar (XP Blue)
+local titleBar = Instance.new("Frame")
+titleBar.Size = UDim2.new(1, -6, 0, 22)
+titleBar.Position = UDim2.new(0, 3, 0, 3)
+titleBar.BackgroundColor3 = Color3.fromRGB(0, 85, 230)
+titleBar.BorderSizePixel = 0
+titleBar.Parent = frame
+
+local titleText = Instance.new("TextLabel")
+titleText.Text = " tower_equipper.exe"
+titleText.Size = UDim2.new(1, -25, 1, 0)
+titleText.BackgroundTransparency = 1
+titleText.TextColor3 = Color3.new(1, 1, 1)
+titleText.Font = Enum.Font.SourceSansBold
+titleText.TextSize = 14
+titleText.TextXAlignment = Enum.TextXAlignment.Left
+titleText.Parent = titleBar
+
+-- Fake Close Button
+local closeBtn = Instance.new("TextLabel")
+closeBtn.Text = "X"
+closeBtn.Size = UDim2.new(0, 18, 0, 18)
+closeBtn.Position = UDim2.new(1, -20, 0, 2)
+closeBtn.BackgroundColor3 = Color3.fromRGB(232, 17, 35)
+closeBtn.TextColor3 = Color3.new(1, 1, 1)
+closeBtn.BorderSizePixel = 1
+closeBtn.Font = Enum.Font.SourceSansBold
+closeBtn.TextSize = 14
+closeBtn.Parent = titleBar
+
+-- Input Label
+local label = Instance.new("TextLabel")
+label.Text = "Select Tower Name:"
+label.Size = UDim2.new(1, -20, 0, 20)
+label.Position = UDim2.new(0, 10, 0, 35)
+label.BackgroundTransparency = 1
+label.TextColor3 = Color3.new(0, 0, 0)
+label.Font = Enum.Font.SourceSans
+label.TextSize = 14
+label.TextXAlignment = Enum.TextXAlignment.Left
+label.Parent = frame
+
+-- TextBox (Inset Style)
 local textbox = Instance.new("TextBox")
-textbox.PlaceholderText = "Loading Key System..."
-textbox.Size = UDim2.new(1, -20, 0, 30)
-textbox.Position = UDim2.new(0, 10, 0, 40)
-textbox.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-textbox.TextColor3 = Color3.fromRGB(230, 230, 230)
+textbox.PlaceholderText = "Wait..."
+textbox.Size = UDim2.new(1, -20, 0, 25)
+textbox.Position = UDim2.new(0, 10, 0, 65)
+textbox.BackgroundColor3 = Color3.new(1, 1, 1)
+textbox.TextColor3 = Color3.new(0, 0, 0)
 textbox.Font = Enum.Font.SourceSans
-textbox.TextSize = 18
+textbox.TextSize = 16
 textbox.TextEditable = false
 textbox.Text = ""
+textbox.BorderSizePixel = 2
+textbox.BorderColor3 = Color3.fromRGB(128, 128, 128)
 textbox.Parent = frame
-Instance.new("UICorner", textbox).CornerRadius = UDim.new(0, 4)
 
+-- // LOGIC
 task.spawn(function()
     if TDS:Addons() then
-        textbox.PlaceholderText = "Type tower name..."
+        textbox.PlaceholderText = "Type tower..."
         textbox.TextEditable = true
     end
 end)
@@ -155,7 +194,9 @@ textbox.FocusLost:Connect(function(enterPressed)
     if not enterPressed or not TDS.Equip then return end
     local tower = resolveTower(textbox.Text)
     if tower then
-        pcall(TDS.Equip, TDS, tower)
+        textbox.Text = "Equipping: " .. tower
+        local ok = pcall(TDS.Equip, TDS, tower)
+        task.wait(0.5)
     end
     textbox.Text = ""
 end)
