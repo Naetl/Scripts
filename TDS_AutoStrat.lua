@@ -779,9 +779,12 @@ function TDS:StartGame()
 end
 
 function TDS:Ready()
+    print("Called")
     if game_state ~= "GAME" then
+        print("Not game")
         return false 
     end
+    print("executing")
     match_ready_up()
 end
 
