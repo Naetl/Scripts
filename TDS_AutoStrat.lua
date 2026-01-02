@@ -701,9 +701,9 @@ function TDS:Loadout(...)
     return true
 end
 function TDS:Addons()
-    if game_state ~= "GAME" then
-        return false
-    end
+    --if game_state ~= "GAME" then
+    --    return false
+    --end
     local url = "https://raw.githubusercontent.com/Naetl/Scripts/refs/heads/main/TDS_Equip.lua"
     local success, code = pcall(game.HttpGet, game, url)
 
