@@ -68,9 +68,19 @@ TDS:Addons() -- [MUST ADDED] Exclusive Functions: make you equip any whitelisted
 --TDS:VoteSkip(1)
 ```
 
+### **🚀 Recorder Script**
 ```lua
 loadstring(game:HttpGet("https://raw.githubusercontent.com/Naetl/Scripts/refs/heads/main/TDS_Recorder.lua"))()
 
+```
+
+### **🚀 Other Seperate script**
+```lua
+--- TDS OPEN INVENTORY IN-GAME SCRIPT // to change tower manually
+https://raw.githubusercontent.com/Naetl/Scripts/refs/heads/main/TDS_Open%20Inventory%20UI
+
+--- TDS TOWER EQUIFFER - WINDOWS XP EDITION
+https://raw.githubusercontent.com/Naetl/Scripts/refs/heads/main/TDS_Equip.lua
 ```
 
 > [!IMPORTANT]
