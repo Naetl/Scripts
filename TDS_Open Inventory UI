@@ -1,0 +1,90 @@
+-- TDS Open Inventory to change Tower
+-- Will show scrollable X button and moveable - Click to toggle OPEN / CLOSE UI
+
+local player = game.Players.LocalPlayer
+local userInputService = game:GetService("UserInputService")
+
+-- // 1. Path to Inventory with Yield Protection
+local invPath = {"Interface", "Root", "Inventory", "View"}
+
+local function getPathSafely(parent, pathTable)
+    local current = parent
+    for _, name in ipairs(pathTable) do
+        -- Wait up to 5 seconds for each child to avoid infinite yield
+        current = current:WaitForChild(name, 5)
+        if not current then 
+            warn("Failed to find: " .. name .. " (Timed out)")
+            return nil 
+        end
+    end
+    return current
+end
+
+local function toggleInventory(state)
+    local playerGui = player:FindFirstChild("PlayerGui")
+    if not playerGui then return end
+
+    local target = getPathSafely(playerGui, invPath)
+
+    if target and target:IsA("GuiObject") then
+        target.Visible = state
+    end
+end
+
+-- // 2. Create the Draggable RPG Button
+local ScreenGui = Instance.new("ScreenGui")
+local RetroButton = Instance.new("TextButton")
+local UIStroke = Instance.new("UIStroke")
+
+ScreenGui.Name = "RPG_Fixed_UI"
+ScreenGui.Parent = game.CoreGui
+ScreenGui.ResetOnSpawn = false
+
+RetroButton.Name = "XButton"
+RetroButton.Parent = ScreenGui
+RetroButton.Size = UDim2.new(0, 35, 0, 35)
+RetroButton.Position = UDim2.new(0.9, 0, 0.1, 0)
+RetroButton.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+RetroButton.BorderSizePixel = 0
+RetroButton.Font = Enum.Font.Arcade
+RetroButton.Text = "X"
+RetroButton.TextColor3 = Color3.fromRGB(255, 50, 50)
+RetroButton.TextSize = 25
+
+UIStroke.Parent = RetroButton
+UIStroke.Thickness = 3
+UIStroke.Color = Color3.fromRGB(180, 180, 180)
+
+-- // 3. Draggable Logic
+local dragging, dragInput, dragStart, startPos
+
+RetroButton.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        dragging = true
+        dragStart = input.Position
+        startPos = RetroButton.Position
+    end
+end)
+
+userInputService.InputChanged:Connect(function(input)
+    if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+        local delta = input.Position - dragStart
+        RetroButton.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+    end
+end)
+
+userInputService.InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        dragging = false
+    end
+end)
+
+-- // 4. Click Logic
+local isOpen = false
+RetroButton.MouseButton1Click:Connect(function()
+    isOpen = not isOpen
+    toggleInventory(isOpen)
+    
+    RetroButton.BackgroundColor3 = isOpen and Color3.fromRGB(60, 0, 0) or Color3.fromRGB(30, 30, 30)
+    RetroButton.TextColor3 = isOpen and Color3.fromRGB(255, 255, 255) or Color3.fromRGB(255, 50, 50)
+end)
