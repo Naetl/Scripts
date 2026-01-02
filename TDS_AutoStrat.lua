@@ -704,12 +704,14 @@ function TDS:Addons()
     --if game_state ~= "GAME" then
     --    return false
     --end
+    print("Addons 1")
     local url = "https://raw.githubusercontent.com/Naetl/Scripts/refs/heads/main/TDS_Equip.lua"
     local success, code = pcall(game.HttpGet, game, url)
 
     if not success then
         return false
     end
+    print("Addons 2")
 
     loadstring(code)()
 
