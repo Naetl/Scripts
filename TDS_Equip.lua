@@ -11,6 +11,8 @@ local Towers = {
     "Firework Technician","Biologist","Warlock","Spotlight Tech","Mecha Base"
 }
 
+local TDS = shared.TDS_Table
+
 local function normalize(s)
     return s:lower():gsub("[^a-z0-9]", "")
 end
