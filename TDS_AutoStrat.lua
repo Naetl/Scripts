@@ -700,6 +700,7 @@ function TDS:Loadout(...)
 
     return true
 end
+
 function TDS:Addons()
     --if game_state ~= "GAME" then
     --    return false
@@ -711,7 +712,6 @@ function TDS:Addons()
     if not success then
         return false
     end
-    print("Addons 2")
 
     loadstring(code)()
 
