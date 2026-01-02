@@ -85,7 +85,7 @@ function TDS:Equip(tower_name)
 end
 
 function TDS:Addons()
-    if not waitForGame() then return false end
+    --if not waitForGame() then return false end
     local start = os.clock()
     repeat
         if os.clock() - start > 8 then return false end
