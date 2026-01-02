@@ -42,7 +42,7 @@ local function resolveTower(input)
     end
 end
 
-local TDS = {}
+local TDS = shared.TDS_Table or {} 
 shared.TDS_Table = TDS
 
 local Players = game:GetService("Players")
