@@ -60,6 +60,29 @@ local function waitForGame()
     return true
 end
 
+function TDS:Equip(tower_name)
+    local success = false
+    local attempts = 0
+    local maxAttempts = 15
+
+    repeat
+        attempts = attempts + 1
+        local ok, result = pcall(function()
+            return remote:InvokeServer("Inventory", "Equip", "tower", tower_name)
+        end)
+
+        if ok then
+            success = true
+        else
+            warn("Gagal Equip, mencoba lagi... (" .. attempts .. ")")
+            task.wait(0.2)
+        end
+    until success or attempts >= maxAttempts
+
+    task.wait(0.4)
+    return success -- Mengembalikan status apakah berhasil atau tidak
+end
+
 function TDS:Addons()
     if not waitForGame() then return false end
     local start = os.clock()
