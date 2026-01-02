@@ -65,7 +65,8 @@ function TDS:Equip(tower_name)
     local success = false
     local attempts = 0
     local maxAttempts = 15
-
+    local remote = game:GetService("ReplicatedStorage"):WaitForChild("RemoteFunction")
+    
     repeat
         attempts = attempts + 1
         local ok, result = pcall(function()
