@@ -111,7 +111,7 @@ old_namecall = hookmetamethod(game, "__namecall", function(self, ...)
                 local currentX = originalData.Position.X
                 
                 for i = 1, loopAmount do
-                    local newPos = vector.create(currentX, base_Y, originalData.Position.Z)
+                    local newPos = vector.create(currentX, originalData.Position.Y + 20, originalData.Position.Z)
                     local newData = {Rotation = originalData.Rotation, Position = newPos}
                     
                     remote:InvokeServer("Troops", action, newData, towerName)
