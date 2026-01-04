@@ -50,7 +50,7 @@ _G.SendWebhook   = false -- Set to true to enable notifications
 _G.Webhook       = "YOUR-WEBHOOK-URL-HERE" 
 
 -- [[ INITIALIZE LIBRARY ]]
-local TDS = loadstring(game:HttpGet("https://raw.githubusercontent.com/Naetl/Scripts/refs/heads/main/TDS_AutoStrat.lua"))()
+local TDS = loadstring(game:HttpGet("https://raw.githubusercontent.com/Naetl/Scripts/refs/heads/main/TDS_Library.lua"))()
 TDS:Addons() -- [MUST ADDED] Exclusive Functions: make you equip any whitelisted tower and enable TDS:Equip()
 
 -- [[ START STRATEGY ]]
@@ -77,7 +77,7 @@ loadstring(game:HttpGet("https://raw.githubusercontent.com/Naetl/Scripts/refs/he
 ### **🚀 Other Seperate script**
 ```lua
 --- TDS OPEN INVENTORY IN-GAME SCRIPT // to change tower manually
-https://raw.githubusercontent.com/Naetl/Scripts/refs/heads/main/TDS_Open%20Inventory%20UI
+https://raw.githubusercontent.com/Naetl/Scripts/refs/heads/main/TDS_OpenInventory
 
 --- TDS TOWER EQUIFFER - WINDOWS XP EDITION
 https://raw.githubusercontent.com/Naetl/Scripts/refs/heads/main/TDS_Equip.lua
