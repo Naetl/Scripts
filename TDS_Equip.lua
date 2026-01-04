@@ -74,14 +74,19 @@ function TDS:Equip(input_name)
     
     repeat
         attempts = attempts + 1
-        local ok, result = pcall(function()
-            return remote:InvokeServer("Inventory", "Equip", "tower", tower_name)
+        
+        local ok = pcall(function()
+            remote:InvokeServer("Inventory", "Equip", "tower", tower_name)
+            task.wait(0.1)
+            remote:InvokeServer("Inventory", "Equip", "pvptower", tower_name)
         end)
 
         if ok then
             success = true
+            print("Success Equip " .. tower_name .. " (Normal & PVP)")
         else
-            task.wait(0.2)
+            warn("Failed attempt:" .. attempts .. ", Trying...")
+            task.wait(0.3)
         end
     until success or attempts >= maxAttempts
 
