@@ -1,139 +1,167 @@
 --[[
-    TDS TOWER STACKER & MULTIPLIER V2.EXE
+    TDS AUTOMATED STACKER & MULTIPLIER V4.0 (LEGACY XP)
     ---------------------------------------------------------
-    1/3/2026 version
-    Description: 
-    Intercepts "Place" requests to duplicate towers horizontally.
+    Build: 1/4/2026
     
-    Features:
-    - Retro Windows 95 UI Style
-    - Recursive Hook Protection (Anti-Crash)
-    - Auto-Off: Disables mod automatically after sequence finish
-    - Fixed Height: Force-locks Y-axis to 95
-    - Precise X-Offset: Increments 1.5 per unit
-    - Safety Delay: 0.5s interval to prevent server kicks
-    - Anti-Reset: UI persists after character death
+    Changes:
+    - Added UI Axis Toggle (X/Z)
+    - Integrated Relative Elevation (Y + 20)
+    - English localization for all comments
+    - Enhanced decompiler-resistant localization
     ---------------------------------------------------------
 ]]
 
-local Players = game:GetService("Players")
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local remote = ReplicatedStorage:WaitForChild("RemoteFunction")
+local _G = getfenv()
+local L_Players = game:GetService("Players")
+local L_RS = game:GetService("ReplicatedStorage")
+local L_Remote = L_RS:WaitForChild("RemoteFunction")
+local L_LP = L_Players.LocalPlayer
 
--- // State Variables
+-- // Internal State
+local Axis_Mode = "X" 
 local isEnabled = false
 local isProcessing = false 
 local loopAmount = 1
-local base_Y = 95
-local x_offset = 1.5
+local offset_val = 1.2
+local height_boost = 20
 
--- // Anti-Reset UI Logic
-local playerGui = Players.LocalPlayer:WaitForChild("PlayerGui")
-if playerGui:FindFirstChild("RetroTDS_UI") then playerGui.RetroTDS_UI:Destroy() end
+-- // UI Bootstrapping
+local L_PG = L_LP:WaitForChild("PlayerGui")
+if L_PG:FindFirstChild("XP_Stacker_V4") then L_PG.XP_Stacker_V4:Destroy() end
 
-local screenGui = Instance.new("ScreenGui", playerGui)
-screenGui.Name = "RetroTDS_UI"
+local screenGui = Instance.new("ScreenGui", L_PG)
+screenGui.Name = "XP_Stacker_V4"
 screenGui.ResetOnSpawn = false
 
--- // UI Window
-local frame = Instance.new("Frame", screenGui)
-frame.Size = UDim2.new(0, 200, 0, 160)
-frame.Position = UDim2.new(0.5, -100, 0.4, 0)
-frame.BackgroundColor3 = Color3.fromRGB(192, 192, 192)
-frame.BorderSizePixel = 2
-frame.Active = true
-frame.Draggable = true
+-- // Main Window (XP Silver/Gray)
+local mainFrame = Instance.new("Frame", screenGui)
+mainFrame.Size = UDim2.new(0, 210, 0, 190)
+mainFrame.Position = UDim2.new(0.5, -105, 0.4, 0)
+mainFrame.BackgroundColor3 = Color3.fromRGB(212, 208, 200)
+mainFrame.BorderSizePixel = 1
+mainFrame.Active = true
+mainFrame.Draggable = true
 
-local titleBar = Instance.new("Frame", frame)
-titleBar.Size = UDim2.new(1, -4, 0, 22)
-titleBar.Position = UDim2.new(0, 2, 0, 2)
-titleBar.BackgroundColor3 = Color3.fromRGB(0, 0, 128)
+local uiStroke = Instance.new("UIStroke", mainFrame)
+uiStroke.Thickness = 2
+uiStroke.Color = Color3.fromRGB(255, 255, 255) -- Outset effect
+uiStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+
+-- // Title Bar
+local titleBar = Instance.new("Frame", mainFrame)
+titleBar.Size = UDim2.new(1, -6, 0, 22)
+titleBar.Position = UDim2.new(0, 3, 0, 3)
+titleBar.BackgroundColor3 = Color3.fromRGB(0, 85, 230)
 titleBar.BorderSizePixel = 0
 
 local titleText = Instance.new("TextLabel", titleBar)
 titleText.Size = UDim2.new(1, -5, 1, 0)
 titleText.Position = UDim2.new(0, 5, 0, 0)
-titleText.Text = "TDS_AUTO_OFF.EXE"
+titleText.Text = "tds_stacker_pro.exe"
 titleText.TextColor3 = Color3.new(1, 1, 1)
-titleText.Font = Enum.Font.Code
+titleText.Font = Enum.Font.SourceSansBold
+titleText.TextSize = 14
 titleText.BackgroundTransparency = 1
 titleText.TextXAlignment = Enum.TextXAlignment.Left
 
-local toggleBtn = Instance.new("TextButton", frame)
-toggleBtn.Size = UDim2.new(0.9, 0, 0, 35)
-toggleBtn.Position = UDim2.new(0.05, 0, 0.25, 0)
-toggleBtn.Text = "STATUS: OFF"
-toggleBtn.Font = Enum.Font.Code
+-- // UI Controls
+local toggleBtn = Instance.new("TextButton", mainFrame)
+toggleBtn.Size = UDim2.new(0.9, 0, 0, 30)
+toggleBtn.Position = UDim2.new(0.05, 0, 0.2, 0)
+toggleBtn.BackgroundColor3 = Color3.fromRGB(212, 208, 200)
+toggleBtn.Text = "ENGINE: OFF"
+toggleBtn.Font = Enum.Font.SourceSans
+toggleBtn.BorderSizePixel = 2
 
-local amountInput = Instance.new("TextBox", frame)
+local axisBtn = Instance.new("TextButton", mainFrame)
+axisBtn.Size = UDim2.new(0.9, 0, 0, 30)
+axisBtn.Position = UDim2.new(0.05, 0, 0.4, 0)
+axisBtn.BackgroundColor3 = Color3.fromRGB(212, 208, 200)
+axisBtn.Text = "MODE: AXIS X (SIDE)"
+axisBtn.Font = Enum.Font.SourceSans
+axisBtn.BorderSizePixel = 2
+
+local amountLabel = Instance.new("TextLabel", mainFrame)
+amountLabel.Size = UDim2.new(0.9, 0, 0, 20)
+amountLabel.Position = UDim2.new(0.05, 0, 0.6, 0)
+amountLabel.Text = "STACKING COUNT:"
+amountLabel.Font = Enum.Font.SourceSans
+amountLabel.TextSize = 12
+amountLabel.BackgroundTransparency = 1
+
+local amountInput = Instance.new("TextBox", mainFrame)
 amountInput.Size = UDim2.new(0.8, 0, 0, 30)
-amountInput.Position = UDim2.new(0.1, 0, 0.68, 0)
+amountInput.Position = UDim2.new(0.1, 0, 0.75, 0)
+amountInput.BackgroundColor3 = Color3.new(1, 1, 1)
 amountInput.Text = "1"
-amountInput.Font = Enum.Font.Code
+amountInput.Font = Enum.Font.SourceSansBold
+amountInput.BorderSizePixel = 2
+amountInput.BorderColor3 = Color3.fromRGB(128, 128, 128)
 
--- // Fungsi Update UI (Agar bisa dipanggil dari mana saja)
-local function updateUI()
-    toggleBtn.Text = isEnabled and "STATUS: ON" or "STATUS: OFF"
-    toggleBtn.BackgroundColor3 = isEnabled and Color3.fromRGB(0, 255, 0) or Color3.fromRGB(192, 192, 192)
+-- // UI Refresh Logic
+local function Refresh()
+    toggleBtn.Text = isEnabled and "ENGINE: ON" or "ENGINE: OFF"
+    toggleBtn.BackgroundColor3 = isEnabled and Color3.fromRGB(150, 255, 150) or Color3.fromRGB(212, 208, 200)
+    axisBtn.Text = "MODE: AXIS " .. Axis_Mode .. (Axis_Mode == "X" and " (SIDE)" or " (FRONT)")
 end
 
 toggleBtn.MouseButton1Click:Connect(function()
     isEnabled = not isEnabled
-    updateUI()
+    Refresh()
 end)
 
-amountInput.FocusLost:Connect(function()
-    loopAmount = math.clamp(tonumber(amountInput.Text) or 1, 1, 15)
-    amountInput.Text = tostring(loopAmount)
+axisBtn.MouseButton1Click:Connect(function()
+    Axis_Mode = (Axis_Mode == "X") and "Z" or "X"
+    Refresh()
 end)
 
--- // Metatable Hooking
-local old_namecall
-old_namecall = hookmetamethod(game, "__namecall", function(self, ...)
+amountInput:GetPropertyChangedSignal("Text"):Connect(function()
+    local val = tonumber(amountInput.Text)
+    if val then loopAmount = math.clamp(val, 1, 15) end
+end)
+
+amountInput.FocusLost:Connect(function() amountInput.Text = tostring(loopAmount) end)
+
+-- // Core Interception Logic
+local L_NM; L_NM = hookmetamethod(game, "__namecall", function(self, ...)
     local method = getnamecallmethod()
     local args = {...}
     
-    -- Proteksi rekursif agar tidak crash
-    if isProcessing then 
-        return old_namecall(self, ...) 
-    end
+    if isProcessing then return L_NM(self, ...) end
 
     if not checkcaller() and isEnabled and method == "InvokeServer" and self.Name == "RemoteFunction" then
-        local action = tostring(args[2])
+        local L_Action = tostring(args[2])
         
-        if action:find("Pl") and action:find("ce") then
-            local towerName = args[4]
-            local originalData = args[3]
+        if L_Action:find("Pl") and L_Action:find("ce") then
+            local L_TName = args[4]
+            local L_OData = args[3]
             
-            isProcessing = true -- Kunci pintu
+            isProcessing = true 
             
             task.spawn(function()
-                local currentX = originalData.Position.X
-                
+                local L_X = L_OData.Position.X
+                local L_Z = L_OData.Position.Z
+                local L_Y = L_OData.Position.Y + height_boost 
+
                 for i = 1, loopAmount do
-                    local newPos = vector.create(currentX, originalData.Position.Y + 20, originalData.Position.Z)
-                    local newData = {Rotation = originalData.Rotation, Position = newPos}
+                    local L_Pos = vector.create(L_X, L_Y, L_Z)
+                    local L_Data = {Rotation = L_OData.Rotation, Position = L_Pos}
                     
-                    remote:InvokeServer("Troops", action, newData, towerName)
+                    L_Remote:InvokeServer("Troops", L_Action, L_Data, L_TName)
                     
-                    currentX = currentX + x_offset
+                    if Axis_Mode == "X" then L_X = L_X + offset_val else L_Z = L_Z + offset_val end
+                    
                     task.wait(0.5) 
                 end
                 
-                -- // FITUR AUTO-OFF
-                isEnabled = false    -- Matikan state
-                isProcessing = false -- Buka kunci pintu
-                updateUI()           -- Perbarui tampilan tombol
-                print("Sequence finished. Mod disabled.")
+                isEnabled = false
+                isProcessing = false 
+                Refresh()
             end)
             
             return nil 
         end
     end
     
-    return old_namecall(self, ...)
-end)
-    end
-    
-    return old_namecall(self, ...)
+    return L_NM(self, ...)
 end)
