@@ -164,23 +164,39 @@ RegisterCommand("speed", {
 })
 
 RegisterCommand("openinv", {
-    Aliases = {"inv"},
-    Description = "Toggle TDS Inventory",
-    Args = {},
-    Execute = function(window, args)
-        local playerGui = Player:FindFirstChild("PlayerGui")
-        if not playerGui then return end
-		local invPath = {"Interface", "Root", "Inventory", "View"}
-        local target = getPathSafely(playerGui, invPath)
+	Aliases = {"inv"},
+	Description = "Toggle TDS Inventory",
+	Args = {},
+	Execute = function(window, args)
+		local playerGui = Player:FindFirstChild("PlayerGui")
+		if not playerGui then return end
 
-        if target and target:IsA("GuiObject") then
-            target.Visible = not target.Visible
-            local stateText = target.Visible and "Opened" or "Closed"
-            window:AddLine("Inventory " .. stateText, Color3.fromRGB(200, 255, 200))
-        else
-            window:AddLine("Error: Inventory UI not found!", Color3.fromRGB(255, 100, 100))
-        end
-    end
+		local invPath = {"Interface", "Root", "Inventory", "View"}
+
+		-- Helper function to find the UI path
+		local function getPathSafely(parent, pathTable)
+			local current = parent
+			for _, name in ipairs(pathTable) do
+				-- Wait up to 2 seconds for each child (reduced for responsiveness)
+				current = current:WaitForChild(name, 2)
+				if not current then 
+					warn("Failed to find: " .. name)
+					return nil 
+				end
+			end
+			return current
+		end
+
+		local target = getPathSafely(playerGui, invPath)
+
+		if target and target:IsA("GuiObject") then
+			target.Visible = not target.Visible
+			local stateText = target.Visible and "Opened" or "Closed"
+			window:AddLine("Inventory " .. stateText, Color3.fromRGB(200, 255, 200))
+		else
+			window:AddLine("Error: Inventory UI not found!", Color3.fromRGB(255, 100, 100))
+		end
+	end
 })
 
 RegisterCommand("gatlingbuff", {
