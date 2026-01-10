@@ -89,7 +89,7 @@ local upgrade_history = {}
 shared.TDS_Table = TDS
 
 -- // ui
-loadstring(game:HttpGet("https://raw.githubusercontent.com/Naetl/Scripts/refs/heads/main/TDS_Equip.lua"))()
+loadstring(game:HttpGet("https://raw.githubusercontent.com/Naetl/Scripts/refs/heads/main/TDS_GuiSource.lua"))()
 local Console = shared.AutoStratGUI.Console
 
 shared.AutoStratGUI.Status(tostring(game_state))
@@ -806,6 +806,15 @@ function TDS:Mode(difficulty)
     return true
 end
 
+local args = {
+	"Inventory",
+	"Unequip",
+	"tower",
+	""
+}
+game:GetService("ReplicatedStorage"):WaitForChild("RemoteFunction"):InvokeServer(unpack(args))
+
+
 function TDS:Loadout(...)
     if game_state ~= "LOBBY" then
         return
@@ -825,6 +834,7 @@ function TDS:Loadout(...)
                 local ok = pcall(function()
                     remote:InvokeServer("Inventory", "Equip", "tower", tower_name)
                     log("Equipped tower: " .. tower_name, "green")
+                    task.wait(0.5)
                 end)
                 if ok then
                     success = true
@@ -835,6 +845,8 @@ function TDS:Loadout(...)
             task.wait(0.4)
         end
     end
+
+    task.wait(0.5)
 
     return true
 end
@@ -849,8 +861,15 @@ function TDS:Addons()
 
     loadstring(code)()
 
-    while not TDS.Equip and TDS.MultiMode and TDS.Multiplayer do
+    while not (TDS.MultiMode and TDS.Multiplayer) do
         task.wait(0.1)
+    end
+
+    local original_equip = TDS.Equip
+    TDS.Equip = function(...)
+        if game_state == "GAME" then
+            return original_equip(...)
+        end
     end
 
     return true
@@ -1196,6 +1215,8 @@ local function start_claim_rewards()
         network:WaitForChild("PlaytimeRewards"):WaitForChild("RF:ClaimReward"):InvokeServer(unpack(args))
         task.wait(0.5)
     end
+    
+    game:GetService("ReplicatedStorage").Network.DailySpin["RF:RedeemReward"]:InvokeServer()
     auto_claim_rewards = false
 end
 
