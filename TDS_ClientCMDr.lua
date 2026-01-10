@@ -163,6 +163,80 @@ RegisterCommand("speed", {
 	end
 })
 
+RegisterCommand("openinv", {
+    Aliases = {"inv"},
+    Description = "Toggle TDS Inventory",
+    Args = {},
+    Execute = function(window, args)
+        local playerGui = Player:FindFirstChild("PlayerGui")
+        if not playerGui then return end
+		local invPath = {"Interface", "Root", "Inventory", "View"}
+        local target = getPathSafely(playerGui, invPath)
+
+        if target and target:IsA("GuiObject") then
+            target.Visible = not target.Visible
+            local stateText = target.Visible and "Opened" or "Closed"
+            window:AddLine("Inventory " .. stateText, Color3.fromRGB(200, 255, 200))
+        else
+            window:AddLine("Error: Inventory UI not found!", Color3.fromRGB(255, 100, 100))
+        end
+    end
+})
+
+RegisterCommand("gatlingbuff", {
+	Aliases = {"gbuff"},
+	Description = "Insanely buff gatling",
+	Args = {},
+	Execute = function(window, args)
+		local success, err = pcall(function()
+			local ReplicatedStorage = game:GetService("ReplicatedStorage")
+			local ggchannel = require(ReplicatedStorage.Resources.Universal.NewNetwork).Channel("GatlingGun")
+			local gganim = require(ReplicatedStorage.Content.Tower["Gatling Gun"].Animator)
+
+			getgenv().gatlingcooldown = 0.01
+			getgenv().multiplytimes = 60
+			getgenv().norecoil = true
+
+			gganim._fireGun = function(arg1)
+				local stores = require(ReplicatedStorage.Client.Interfaces.Stores)
+				local camcontroller = require(ReplicatedStorage.Content.Tower["Gatling Gun"].Animator.CameraController)
+				local minigun = arg1.Replicator:Get("Minigun")
+				
+				local canfire
+				if minigun then
+					canfire = arg1.Replicator:Get("CanFire")
+				end
+
+				if not arg1.Replicator:Get("Minigun") and true or canfire then
+					arg1:_fire(camcontroller.position)
+					if not getgenv().norecoil then
+						stores.CrosshairStore.store:dispatch({
+							["type"] = "addSpread",
+							["spread"] = arg1.Stats.Attributes.SpreadAdd or 10
+						})
+						camcontroller.recoil(arg1.Stats.Attributes.Recoil or 0.03)
+					end
+				end
+
+				local camposition = camcontroller.result and camcontroller.result.Position or camcontroller.position
+				
+				for i = 1, getgenv().multiplytimes do
+					ggchannel:fireServer("Fire", camposition, workspace:GetAttribute("Sync"), workspace:GetServerTimeNow())
+				end
+				
+				arg1:Wait(getgenv().gatlingcooldown)
+			end
+		end)
+
+		if success then
+			window:AddLine("Gatling Buff Applied (60x Dmg, No Recoil)", Color3.fromRGB(0, 255, 100))
+		else
+			window:AddLine("Error: Gatling Gun module not found or failed to hook.", Color3.fromRGB(255, 80, 80))
+			warn(err)
+		end
+	end
+})
+
 RegisterCommand("reset", {
 	Aliases = {"re"},
 	Description = "Resets your character locally.",
