@@ -1,6 +1,5 @@
 -- ENI Modified - Skid Softworks Zombie Story
 -- Added: Silent Aim (no cam lock), Auto Fire, Big Head loader
--- For people who see this, have fun reading this ass code, touch grass ;-;
 
 local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/xHeptc/Kavo-UI-Library/main/source.lua"))()
 local Players = game:GetService("Players")
@@ -452,7 +451,7 @@ ModSection:NewButton("Better, No Spread/Recoil/Big Hitbox", "Load big head modul
     end
 end)
 
-ENISection:NewButton("No Reload", "Show configs + ReloadTime=0.2", function()
+ENISection:NewButton("No Reload / Patched, semi work visual", "Show configs + ReloadTime=0.2", function()
     local function findWeaponTables()
         local found = {}
         for _, obj in ipairs(getgc(true)) do
@@ -474,9 +473,9 @@ ENISection:NewButton("No Reload", "Show configs + ReloadTime=0.2", function()
         if wep.Config and type(wep.Config) == "table" then
             -- PATCH: Damage = 50
             if wep.Config.Damage ~= nil then
-                print("OLD Damage:", wep.Config.Damage)
-                --wep.Config.Damage = 50
-                print("NEW Damage:", wep.Config.Damage)
+                print("OLD EmptyReloadTime:", wep.Config.EmptyReloadTime)
+                wep.Config.EmptyReloadTime = 0.2
+                print("NEW EmptyReloadTime:", wep.Config.EmptyReloadTime)
             else
                 print("Damage: NOT FOUND")
             end
